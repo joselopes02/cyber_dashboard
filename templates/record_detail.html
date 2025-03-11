@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Record Details{% endblock %}
+
+{% block content %}
+<h1>Record Details</h1>
+
+<div class="detail-container">
+  <div class="attack-info">
+    <h2>Attack Information</h2>
+    {% if record_type == 'link' %}
+      <p><strong>Date:</strong> {{ record.date[:10] }}</p>
+      <p><strong>Source ip:</strong> {{ record.source_ip }}</p>
+      <p><strong>Source port:</strong> {{ record.source_port }}</p>
+      <p><strong>URL:</strong> {{ record.url }}</p>
+      <p><strong>Protocol:</strong> {{ record.protocol }}</p>
+      <p><strong>Honeypot Name:</strong> {{ record.honeypot_name }}</p>
+
+
+    {% elif record_type == 'payload' %}
+      <p><strong>Date:</strong> {{ record.date[:10] }}</p>
+      <p><strong>Source ip:</strong> {{ record.source_ip }}</p>
+      <p><strong>Source port:</strong> {{ record.source_port }}</p>
+      <p><strong>MD5:</strong> {{ record.md5 }}</p>
+      <p><strong>Protocol:</strong> {{ record.protocol }}</p>
+      <p><strong>Honeypot Name:</strong> {{ record.honeypot_name }}</p>
+
+    {% endif %}
+    {% if record.latitude and record.longitude %}
+    <p><strong>IP Source Location:</strong></p>
+    <div id="map" style="height: 300px; margin-top: 10px;"></div>
+    {% endif %}
+  </div>
+  
+  <div class="extra-info">
+    {% if record_type == 'link' %}
+      <h2>Link Information</h2>
+      <p><strong>Threat Names:</strong> {{ record.threat_names }}</p>
+      <p><strong>Malicious Flags:</strong> {{ record.malicious_flags }}</p>
+      <p><strong>Times Submitted:</strong> {{ record.times_submitted }}</p>
+      <p><strong>Reputation:</strong> {{ record.reputation }}</p>
+
+        <button onclick="copyShasum('{{ record.shasum }}')">Copy SHASUM</button>
+        <button onclick="redirectToVirusTotal('{{ record.url }}')">View on VirusTotal</button>
+     
+      
+        {% if download_record %}
+        <h2>Payload Information</h2>
+        <p><strong>MD5:</strong> {{ download_record.md5 }}</p>
+        <p><strong>Popular Label:</strong> {{ download_record.popular_label }}</p>
+        <p><strong>Type:</strong> {{ download_record.type }}</p>
+        <p><strong>File Size:</strong> {{ download_record.file_size }} b</p>
+        <p><strong>Times Submitted:</strong> {{ download_record.times_submitted }}</p>
+        <p><strong>Reputation:</strong> {{ download_record.reputation }}</p>
+        <p><strong>Malicious Flags:</strong> {{ download_record.malicious_flags }}</p>
+        <button onclick="window.location.href='{{ url_for('dashboard.download_file', md5=download_record.md5) }}'"> Download File</button>
+        <button onclick="redirectToVirusTotalMD5('{{ download_record.md5 }}')">View on VirusTotal</button>
+        {% endif %}
+    {% elif record_type == 'payload' %}
+      <h2>Payload Information</h2>
+      <p><strong>Popular Label:</strong> {{ record.popular_label }}</p>
+      <p><strong>Type:</strong> {{ record.type }}</p>
+      <p><strong>File Size:</strong> {{ record.file_size }} b</p>
+      <p><strong>Times Submitted:</strong> {{ record.times_submitted }}</p>
+      <p><strong>Reputation:</strong> {{ record.reputation }}</p>
+      <p><strong>Malicious Flags:</strong> {{ record.malicious_flags }}</p>
+      <button onclick="window.location.href='{{ url_for('dashboard.download_file', md5=record.md5) }}'">Download File</button>
+      <button onclick="redirectToVirusTotalMD5('{{ record.md5 }}')">View on VirusTotal</button>
+    {% endif %}
+  </div>
+</div>
+
+<button onclick="window.history.back()">Go Back</button>
+<script>
+    function copyShasum(sha) {
+      navigator.clipboard.writeText(sha).then(() => {
+        alert('SHASUM copied to clipboard!');
+      }).catch(() => {
+        alert('Failed to copy SHASUM.');
+      });
+    }
+    function redirectToVirusTotal(url) {
+    // Custom encoding: replace ":" with "%253A" and "/" with "%252F"
+    function encodeForVT(u) {
+      return u.replace(/:/g, '%253A').replace(/\//g, '%252F');
+    }
+    var encodedUrl = encodeForVT(url);
+    var vtUrl = "https://virustotal.com/gui/search/" + encodedUrl;
+    window.open(vtUrl, '_blank'); 
+
+  }
+  function redirectToVirusTotalMD5(md5) {
+  var vtUrl = "https://www.virustotal.com/gui/search/" + md5;
+  window.open(vtUrl, '_blank');
+}
+
+    {% if record.latitude and record.longitude %}
+    document.addEventListener("DOMContentLoaded", function() {
+        var lat = {{ record.latitude }};
+        var lng = {{ record.longitude }};
+        var map = L.map('map').setView([lat, lng], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        L.marker([lat, lng]).addTo(map);
+    });
+    {% endif %}
+  </script>
+{% endblock %}
