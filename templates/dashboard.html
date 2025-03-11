@@ -84,11 +84,11 @@
     </table>
     <div class="pagination">
         {% if payloads_paginated.has_prev %}
-            <a href="{{ url_for('dashboard.dashboard', view='payload', search=search_query, links_page=links_paginated.page, payload_page=payloads_paginated.prev_num, per_page=request.args.get('per_page', 10)) }}">&laquo; Prev Payloads</a>
+            <a href="{{ url_for('dashboard.dashboard', view='payload', search=search_query, links_page=links_paginated.page, payload_page=payloads_paginated.prev_num, per_page=request.args.get('per_page', 20)) }}">&laquo; Prev Payloads</a>
         {% endif %}
         <span>Page {{ payloads_paginated.page }} of {{ payloads_paginated.pages }}</span>
         {% if payloads_paginated.has_next %}
-            <a href="{{ url_for('dashboard.dashboard', view='payload', search=search_query, links_page=links_paginated.page, payload_page=payloads_paginated.next_num, per_page=request.args.get('per_page', 10)) }}">Next Payloads &raquo;</a>
+            <a href="{{ url_for('dashboard.dashboard', view='payload', search=search_query, links_page=links_paginated.page, payload_page=payloads_paginated.next_num, per_page=request.args.get('per_page', 20)) }}">Next Payloads &raquo;</a>
         {% endif %}
     </div>
 {% endif %}
