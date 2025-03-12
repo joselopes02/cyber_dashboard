@@ -3,38 +3,42 @@ from models import URL, Download, Attack, db
 from sqlalchemy import func
 from datetime import datetime
 import json
+from app import cache
 from urllib.parse import urlparse
-
+from collections import Counter
 
 statistics_bp = Blueprint('statistics', __name__, url_prefix='/statistics')
+
 def extract_domain(url):
-    # If the URL doesn't start with a scheme, prepend "http://"
+    # Prepend scheme if missing, then parse hostname
     if not url.startswith("http://") and not url.startswith("https://"):
         url = "http://" + url
     parsed = urlparse(url)
     return parsed.hostname
 
 @statistics_bp.route('/')
+@cache.cached(timeout=180)
 def statistics():
-    # Total counts
+    # Total counts (selecting only counts)
     url_count = URL.query.count()
     attack_url_count = Attack.query.filter(Attack.url != None, Attack.url != '').count()
     attack_md5_count = Attack.query.filter(Attack.md5 != None, Attack.md5 != '').count()
     download_count = Download.query.count()
-    
-    # Determine dataset duration using only rows with valid dates.
-    min_date_str = db.session.query(func.min(Attack.date)).filter(Attack.date != None, Attack.date != '').scalar()
-    max_date_str = db.session.query(func.max(Attack.date)).filter(Attack.date != None, Attack.date != '').scalar()
-    print("min",min_date_str)
-    print("max",max_date_str)
-    
+
+    # Use common filter conditions to avoid repetition
+    valid_date = (Attack.date != None, Attack.date != '')
+    valid_url  = (Attack.url != None, Attack.url != '')
+    valid_md5  = (Attack.md5 != None, Attack.md5 != '')
+
+    # Determine dataset duration: Use only the first 10 characters (YYYY-MM-DD) of valid dates
+    min_date_str = db.session.query(func.min(Attack.date)).filter(*valid_date).scalar()
+    max_date_str = db.session.query(func.max(Attack.date)).filter(*valid_date).scalar()
     if min_date_str and max_date_str:
         try:
             min_date = datetime.strptime(min_date_str.strip()[:10], "%Y-%m-%d").date()
             max_date = datetime.strptime(max_date_str.strip()[:10], "%Y-%m-%d").date()
             days = (max_date - min_date).days + 1
-            
-        except Exception as e:
+        except Exception:
             days = 1
     else:
         days = 1
@@ -44,57 +48,50 @@ def statistics():
     avg_attacks_url_per_day = attack_url_count / days
     avg_attacks_payload_per_day = attack_md5_count / days
 
-    # --- Time Series Data for daily distinct counts ---
-    # Extract day (YYYY-MM-DD) from Attack.date.
+    # --- Daily Time Series Data ---
     daily_urls = db.session.query(
         func.substr(Attack.date, 1, 10).label("day"),
         func.count(func.distinct(Attack.url)).label("url_count")
-    ).filter(Attack.date != None, Attack.date != '', Attack.url != None, Attack.url != '').group_by("day").order_by("day").all()
-
+    ).filter(*valid_date, *valid_url).group_by("day").order_by("day").all()
     daily_payloads = db.session.query(
         func.substr(Attack.date, 1, 10).label("day"),
         func.count(func.distinct(Attack.md5)).label("payload_count")
-    ).filter(Attack.date != None, Attack.date != '', Attack.md5 != None, Attack.md5 != '').group_by("day").order_by("day").all()
+    ).filter(*valid_date, *valid_md5).group_by("day").order_by("day").all()
 
-    # Convert results to lists.
     daily_url_labels = [row.day for row in daily_urls]
     daily_url_counts = [row.url_count for row in daily_urls]
-
     daily_payload_labels = [row.day for row in daily_payloads]
     daily_payload_counts = [row.payload_count for row in daily_payloads]
-
-    # Build a combined time series:
+    # Build a combined time series using union of days:
     all_days = sorted(set(daily_url_labels) | set(daily_payload_labels))
     url_dict = {row.day: row.url_count for row in daily_urls}
     payload_dict = {row.day: row.payload_count for row in daily_payloads}
     combined_total = [url_dict.get(day, 0) + payload_dict.get(day, 0) for day in all_days]
 
-    # --- Top Domains Board ---
-    attacks = Attack.query.filter(Attack.url != None, Attack.url != '').all()
+    # --- Top Domains ---
+    # Query only the URL field from Attack to reduce data transferred.
+    attack_urls = db.session.query(Attack.url).filter(*valid_url).all()
     domain_counts = {}
-    for attack in attacks:
+    for (url_val,) in attack_urls:
         try:
-            domain = extract_domain(attack.url)
+            domain = extract_domain(url_val)
             if domain:
                 domain_counts[domain] = domain_counts.get(domain, 0) + 1
         except Exception:
             continue
-
-    # Sort the domains by count in descending order and take top 10
     top_domains = sorted(domain_counts.items(), key=lambda x: x[1], reverse=True)[:10]
 
-    # --- Top Payloads Board ---
-    attacks_with_md5 = Attack.query.filter(Attack.md5 != None, Attack.md5 != '').all()
+    # --- Top Payloads ---
+    # Query only the md5 field.
+    attack_md5s = db.session.query(Attack.md5).filter(*valid_md5).all()
     payload_counts = {}
-    for attack in attacks_with_md5:
-        md5 = attack.md5.strip()
-        if md5:
-            payload_counts[md5] = payload_counts.get(md5, 0) + 1
-
-    # Sort the payloads by count in descending order and take top 10.
+    for (md5_val,) in attack_md5s:
+        token = md5_val.strip()
+        if token:
+            payload_counts[token] = payload_counts.get(token, 0) + 1
     top_payloads = sorted(payload_counts.items(), key=lambda x: x[1], reverse=True)[:10]
 
-# --- New: Top Honeypot and Protocol Distributions for Pie Charts ---
+    # --- Top Honeypot and Protocol Distributions for Pie Charts ---
     honeypot_stats = db.session.query(
         Attack.honeypot_name,
         func.count(Attack.id).label("count")
@@ -109,42 +106,27 @@ def statistics():
     protocol_labels = [row.protocol for row in protocol_stats]
     protocol_counts = [row.count for row in protocol_stats]
 
+    # --- Locations for Map ---
     locations = db.session.query(Attack.latitude, Attack.longitude)\
                     .filter(Attack.latitude != None, Attack.longitude != None)\
                     .all()
-        
     location_data = [{"lat": loc[0], "lng": loc[1]} for loc in locations]
-    
-        # --- Top Threat Tokens Board ---
+
+    # --- Top Threat Tokens ---
     urls_with_threats = URL.query.filter(URL.threat_names != None, URL.threat_names != '').all()
-    threat_token_counts = {}
-    for url in urls_with_threats:
-        # Split the threat_names string on commas
-        tokens = url.threat_names.split(',')
-        for token in tokens:
-            # Normalize the token by stripping whitespace and converting to lowercase
-            normalized = token.strip().lower()
-            if normalized:
-                threat_token_counts[normalized] = threat_token_counts.get(normalized, 0) + 1
+    threat_tokens = Counter()
+    for url_obj in urls_with_threats:
+        tokens = [token.strip().lower() for token in url_obj.threat_names.split(',') if token.strip()]
+        threat_tokens.update(tokens)
+    top_threat_tokens = threat_tokens.most_common(10)
 
-    # Sort the tokens by count in descending order and take the top 10
-    top_threat_tokens = sorted(threat_token_counts.items(), key=lambda x: x[1], reverse=True)[:10]
-
-        # --- Top popular_label Tokens Board ---
-    download_popular_label = Download.query.filter(Download.popular_label != None, Download.popular_label != '').all()
-    download_popular_labelcounts = {}
-    for download in download_popular_label:
-        # Split the popular_label string on commas
-        tokens = download.popular_label.split(',')
-        for token in tokens:
-            # Normalize the token by stripping whitespace and converting to lowercase
-            normalized = token.strip().lower()
-            if normalized:
-                download_popular_labelcounts[normalized] = download_popular_labelcounts.get(normalized, 0) + 1
-
-    # Sort the tokens by count in descending order and take the top 10
-    top_popular_labelcounts = sorted(download_popular_labelcounts.items(), key=lambda x: x[1], reverse=True)[:10]
-
+    # --- Top Popular Label Tokens ---
+    downloads_with_labels = Download.query.filter(Download.popular_label != None, Download.popular_label != '').all()
+    popular_labels = Counter()
+    for download_obj in downloads_with_labels:
+        tokens = [token.strip().lower() for token in download_obj.popular_label.split(',') if token.strip()]
+        popular_labels.update(tokens)
+    top_popular_labelcounts = popular_labels.most_common(10)
 
     return render_template("statistics.html",
                            url_count=url_count,

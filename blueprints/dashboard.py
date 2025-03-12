@@ -1,10 +1,12 @@
 from flask import Blueprint, render_template, request, abort, send_file, url_for
 from models import URL, Download, Attack, db
+from app import cache
 import io
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 @dashboard_bp.route('/')
+@cache.cached(timeout=180, query_string=True)
 def dashboard():
     # Retrieve parameters from the query string
     search_query = request.args.get('search', '')
@@ -77,6 +79,7 @@ def dashboard():
     )
 
 @dashboard_bp.route('/record/<record_type>/<identifier>')
+@cache.cached(timeout=180)
 def record_detail(record_type, identifier):
     if record_type == 'link':
 

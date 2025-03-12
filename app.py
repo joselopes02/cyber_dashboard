@@ -5,6 +5,11 @@ from models import db
 from blueprints.dashboard import dashboard_bp
 from blueprints.statistics import statistics_bp
 from blueprints.documentation import documentation_bp
+from flask_caching import Cache
+
+
+# Create a cache instance
+cache = Cache()
 
 def create_app():
     app = Flask(__name__)
@@ -12,6 +17,11 @@ def create_app():
     
     # Initialize SQLAlchemy with the app
     db.init_app(app)
+
+    # Initialize cache with a simple configuration 
+    app.config['CACHE_TYPE'] = 'simple'
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 180  
+    cache.init_app(app)
     
     # Register blueprints for modular routing
     app.register_blueprint(dashboard_bp)
