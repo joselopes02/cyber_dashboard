@@ -3,7 +3,7 @@ from models import URL, Download, Attack, db
 from sqlalchemy import func
 from datetime import datetime
 import json
-from app import cache
+from extensions import cache
 from urllib.parse import urlparse
 from collections import Counter
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, abort, send_file, url_for
 from models import URL, Download, Attack, db
-from app import cache
 import io
+from extensions import cache
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 

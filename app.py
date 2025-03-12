@@ -5,11 +5,9 @@ from models import db
 from blueprints.dashboard import dashboard_bp
 from blueprints.statistics import statistics_bp
 from blueprints.documentation import documentation_bp
-from flask_caching import Cache
+from extensions import cache
 
 
-# Create a cache instance
-cache = Cache()
 
 def create_app():
     app = Flask(__name__)
