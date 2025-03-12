@@ -4,11 +4,313 @@
 
 {% block content %}
 <h1>Statistics</h1>
-<div class="stats">
-    <p><strong>Total URLs:</strong> {{ stats.total_urls }}</p>
-    <p><strong>Total Downloads:</strong> {{ stats.total_downloads }}</p>
-    <p><strong>Malicious Downloads:</strong> {{ stats.malicious_downloads }}</p>
-    <p><strong>URL to Download Ratio:</strong> {{ stats.url_to_download_ratio }}</p>
+
+<div class="stats-container">
+  <div class="stat-box">
+    <h2>Total Counts</h2>
+    <p><strong>Different URLs (from URL table):</strong> {{ url_count }}</p>
+    <p><strong>Attacks via URL:</strong> {{ attack_url_count }}</p>
+    <p><strong>Attacks via Payload:</strong> {{ attack_md5_count }}</p>
+    <p><strong>Different Payloads (from Download table):</strong> {{ download_count }}</p>
+    <p><strong>Dataset Duration (days):</strong> {{ days }}</p>
+  </div>
+  
+  <div class="stat-box">
+    <h2>Averages per Day</h2>
+    <p><strong>Average Different URLs per Day:</strong> {{ avg_urls_per_day | round(2) }}</p>
+    <p><strong>Average Different Payloads per Day:</strong> {{ avg_downloads_per_day | round(2) }}</p>
+    <p><strong>Average Attacks via URL per Day:</strong> {{ avg_attacks_url_per_day | round(2) }}</p>
+    <p><strong>Average Attacks via Payload per Day:</strong> {{ avg_attacks_payload_per_day | round(2) }}</p>
+  </div>
 </div>
-<button onclick="window.history.back()">Go Back</button>
+
+<!-- Charts -->
+<div class="chart-container">
+  <canvas id="dailyUrlsChart"></canvas>
+</div>
+
+<div class="chart-container">
+  <canvas id="dailyPayloadsChart"></canvas>
+</div>
+
+<div class="chart-container">
+  <canvas id="combinedChart"></canvas>
+</div>
+
+<!-- Pie Charts: Honeypot and Protocol -->
+<div class="pie-charts-container">
+    <div class="one_pie_chart-container">
+      <canvas id="honeypotPieChart"></canvas>
+    </div>
+    <div class="one_pie_chart-container">
+      <canvas id="protocolPieChart"></canvas>
+    </div>
+  </div>
+<!-- Map for Attack Locations -->
+<div class="chart-container">
+    <div id="attackLocationsMap" style="height: 500px;"></div>
+  </div>
+<!-- Top Domains Board -->
+<div class="stat-box" style="margin: 40px auto; max-width:800px;">
+  <h2>Top 10 Most Used Domains</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Domain</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for domain, count in top_domains %}
+      <tr>
+        <td>{{ domain }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<!-- Top Payloads Board -->
+<div class="stat-box" style="margin: 40px auto; max-width:800px;">
+    <h2>Top 10 Most Used Payloads</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Payload (MD5)</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for md5, count in top_payloads %}
+        <tr onclick="window.location.href='{{ url_for('dashboard.dashboard', view='payload', search=md5, links_page=1, payload_page=1, per_page=20) }}'" style="cursor:pointer;">
+            <td>{{ md5 }}</td>
+            <td>{{ count }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+<!-- Top Threat Tokens Board -->
+<div class="stat-box" style="margin: 40px auto; max-width:800px;">
+    <h2>Top 10 Threat Tag</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Threat Token</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for token, count in top_threat_tokens %}
+        <tr onclick="window.location.href='{{ url_for('dashboard.dashboard', view='links', search=token, links_page=1, payload_page=1, per_page=20) }}'" style="cursor:pointer;">
+          <td>{{ token }}</td>
+          <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div> 
+  <!-- Top Threat Tokens Board -->
+<div class="stat-box" style="margin: 40px auto; max-width:800px;">
+    <h2>Top 10 Payload Popular Tag</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Threat Token</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for token, count in top_popular_labelcounts %}
+        <tr>
+          <td>{{ token }}</td>
+          <td>{{ count }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+<script>
+  // Parse JSON data passed from the route.
+  var dailyUrlLabels = {{ daily_url_labels | safe }};
+  var dailyUrlCounts = {{ daily_url_counts | safe }};
+  var dailyPayloadLabels = {{ daily_payload_labels | safe }};
+  var dailyPayloadCounts = {{ daily_payload_counts | safe }};
+  var combinedDays = {{ combined_days | safe }};
+  var combinedTotal = {{ combined_total | safe }};
+  
+  var honeypotLabels = {{ honeypot_labels | safe }};
+  var honeypotCounts = {{ honeypot_counts | safe }};
+  var protocolLabels = {{ protocol_labels | safe }};
+  var protocolCounts = {{ protocol_counts | safe }};
+
+  // Chart for daily distinct URLs with onClick handler.
+  var ctxUrls = document.getElementById('dailyUrlsChart').getContext('2d');
+  var dailyUrlsChart = new Chart(ctxUrls, {
+      type: 'line',
+      data: {
+          labels: dailyUrlLabels,
+          datasets: [{
+              label: 'Distinct URLs per Day',
+              data: dailyUrlCounts,
+              borderColor: 'rgba(255, 85, 85, 1)',
+              backgroundColor: 'rgba(255, 85, 85, 0.2)',
+              fill: true
+          }]
+      },
+      options: {
+          onClick: function(evt, activeElements) {
+              if (activeElements.length > 0) {
+                  var index = activeElements[0].index;
+                  var day = dailyUrlLabels[index];
+                  // Redirect to dashboard for "links" view filtering by the clicked day.
+                  window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(day);
+              }
+          },
+          scales: {
+              y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+          },
+          plugins: {
+              title: { display: true, text: 'Daily Distinct URLs' }
+          }
+      }
+  });
+
+  // Chart for daily distinct payloads with onClick handler.
+  var ctxPayloads = document.getElementById('dailyPayloadsChart').getContext('2d');
+  var dailyPayloadsChart = new Chart(ctxPayloads, {
+      type: 'line',
+      data: {
+          labels: dailyPayloadLabels,
+          datasets: [{
+              label: 'Distinct Payloads per Day',
+              data: dailyPayloadCounts,
+              borderColor: 'rgba(75, 192, 192, 1)',
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              fill: true
+          }]
+      },
+      options: {
+          onClick: function(evt, activeElements) {
+              if (activeElements.length > 0) {
+                  var index = activeElements[0].index;
+                  var day = dailyPayloadLabels[index];
+                  // Redirect to dashboard for "payload" view filtering by the clicked day.
+                  window.location.href = "/dashboard/?view=payload&search=" + encodeURIComponent(day);
+              }
+          },
+          scales: {
+              y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+          },
+          plugins: {
+              title: { display: true, text: 'Daily Distinct Payloads' }
+          }
+      }
+  });
+
+  // Combined chart: sum the daily URLs and payloads. No onClick here.
+  var ctxCombined = document.getElementById('combinedChart').getContext('2d');
+  var combinedChart = new Chart(ctxCombined, {
+      type: 'line',
+      data: {
+          labels: combinedDays,
+          datasets: [{
+              label: 'Combined Daily Total',
+              data: combinedTotal,
+              borderColor: 'rgba(255, 206, 86, 1)',
+              backgroundColor: 'rgba(255, 206, 86, 0.2)',
+              fill: true
+          }]
+      },
+      options: {
+          scales: {
+              y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+          },
+          plugins: {
+              title: { display: true, text: 'Combined Daily Distinct Count (URLs + Payloads)' }
+          }
+      }
+  });
+
+  // Honeypot Pie Chart with onClick: redirects using the clicked honeypot as search filter.
+  var ctxHoneypot = document.getElementById('honeypotPieChart').getContext('2d');
+  var honeypotPieChart = new Chart(ctxHoneypot, {
+      type: 'pie',
+      data: {
+          labels: honeypotLabels,
+          datasets: [{
+              data: honeypotCounts,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.6)',
+                  'rgba(54, 162, 235, 0.6)',
+                  'rgba(255, 206, 86, 0.6)',
+                  'rgba(75, 192, 192, 0.6)',
+                  'rgba(153, 102, 255, 0.6)',
+                  'rgba(255, 159, 64, 0.6)'
+              ]
+          }]
+      },
+      options: {
+          onClick: function(evt, activeElements) {
+              if(activeElements.length > 0){
+                  var index = activeElements[0].index;
+                  var honeypot = honeypotLabels[index];
+                  window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(honeypot);
+              }
+          },
+          plugins: {
+              title: { display: true, text: 'Honeypot Distribution' }
+          }
+      }
+  });
+
+  // Protocol Pie Chart with onClick: redirects using the clicked protocol as search filter.
+  var ctxProtocol = document.getElementById('protocolPieChart').getContext('2d');
+  var protocolPieChart = new Chart(ctxProtocol, {
+      type: 'pie',
+      data: {
+          labels: protocolLabels,
+          datasets: [{
+              data: protocolCounts,
+              backgroundColor: [
+                  'rgba(255, 99, 132, 0.6)',
+                  'rgba(54, 162, 235, 0.6)',
+                  'rgba(255, 206, 86, 0.6)',
+                  'rgba(75, 192, 192, 0.6)',
+                  'rgba(153, 102, 255, 0.6)',
+                  'rgba(255, 159, 64, 0.6)'
+              ]
+          }]
+      },
+      options: {
+          onClick: function(evt, activeElements) {
+              if(activeElements.length > 0){
+                  var index = activeElements[0].index;
+                  var protocol = protocolLabels[index];
+                  window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(protocol);
+              }
+          },
+          plugins: {
+              title: { display: true, text: 'Protocol Distribution' }
+          }
+      }
+  });
+
+  var locationData = {{ location_data | safe }};
+  var map = L.map('attackLocationsMap').setView([0, 0], 2);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+}).addTo(map);
+
+  var markers = L.markerClusterGroup();
+  locationData.forEach(function(loc) {
+      if (loc.lat && loc.lng) {
+          var marker = L.marker([loc.lat, loc.lng]);
+          markers.addLayer(marker);
+      }
+  });
+  map.addLayer(markers);
+</script>
 {% endblock %}

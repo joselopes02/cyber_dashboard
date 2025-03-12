@@ -8,7 +8,7 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 def dashboard():
     # Retrieve parameters from the query string
     search_query = request.args.get('search', '')
-    view = request.args.get('view', 'links')  # "links" or "payloads"
+    view = request.args.get('view', 'links')  
     links_page = int(request.args.get('links_page', 1))
     payload_page = int(request.args.get('payload_page', 1))
     per_page = int(request.args.get('per_page', 20))
@@ -33,6 +33,7 @@ def dashboard():
             (Attack.protocol.contains(search_query)) |
             (Attack.honeypot_name.contains(search_query)) |
             (URL.threat_names.contains(search_query)) |
+            (Attack.date.contains(search_query)) |
             (URL.shasum.contains(search_query))
         )
     links_paginated = links_query.paginate(page=links_page, per_page=per_page, error_out=False)
@@ -59,6 +60,7 @@ def dashboard():
                 (Attack.md5.contains(search_query)) |
                 (Download.type.contains(search_query)) |
                 (Attack.protocol.contains(search_query)) |
+                (Attack.date.contains(search_query)) |
                 (Attack.honeypot_name.contains(search_query))
             )
         
@@ -114,7 +116,7 @@ def record_detail(record_type, identifier):
                     Download.popular_label, 
                     Download.malicious_flags
                 ).join(Download, Attack.md5 == Download.md5, isouter=True
-                ).filter(Attack.md5 != None, Attack.md5 != '').first_or_404()
+                ).filter(Attack.md5 == identifier).first_or_404()
         return render_template('record_detail.html', record=record, record_type=record_type)
     else:
         abort(404)
