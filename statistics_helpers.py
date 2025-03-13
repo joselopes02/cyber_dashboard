@@ -1,8 +1,8 @@
-from models import URL, Download, Attack, Augmented_Attacks, db
+from .models import URL, Download, Attack, Augmented_Attacks, db
 from sqlalchemy import func
 from datetime import datetime
 import json
-from extensions import cache
+from .extensions import cache
 from urllib.parse import urlparse
 from collections import Counter
 
