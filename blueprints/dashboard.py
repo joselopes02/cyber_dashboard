@@ -31,12 +31,12 @@ def dashboard():
     
     if search_query:
         links_query = links_query.filter(
-            (Attack.url.contains(search_query)) |
-            (Attack.protocol.contains(search_query)) |
-            (Attack.honeypot_name.contains(search_query)) |
-            (URL.threat_names.contains(search_query)) |
-            (Attack.date.contains(search_query)) |
-            (URL.shasum.contains(search_query))
+            (Attack.url.startswith(search_query)) |
+            (Attack.protocol.startswith(search_query)) |
+            (Attack.honeypot_name.startswith(search_query)) |
+            (URL.threat_names.startswith(search_query)) |
+            (Attack.date.startswith(search_query)) |
+            (URL.shasum.startswith(search_query))
         )
     links_paginated = links_query.paginate(page=links_page, per_page=per_page, error_out=False)
     
@@ -59,11 +59,11 @@ def dashboard():
     
     if search_query:
             payloads_query = payloads_query.filter(
-                (Attack.md5.contains(search_query)) |
-                (Download.type.contains(search_query)) |
-                (Attack.protocol.contains(search_query)) |
-                (Attack.date.contains(search_query)) |
-                (Attack.honeypot_name.contains(search_query))
+                (Attack.md5.startswith(search_query)) |
+                (Download.type.startswith(search_query)) |
+                (Attack.protocol.startswith(search_query)) |
+                (Attack.date.startswith(search_query)) |
+                (Attack.honeypot_name.startswith(search_query))
             )
         
     payloads_paginated = payloads_query.paginate(page=payload_page, per_page=per_page, error_out=False)
