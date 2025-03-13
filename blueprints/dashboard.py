@@ -22,10 +22,6 @@ def dashboard():
         Attack.protocol, 
         Attack.honeypot_name, 
         URL.threat_names,
-        URL.shasum,
-        URL.malicious_flags,
-        URL.reputation,
-        URL.times_submitted
     ).join(URL, Attack.url == URL.url, isouter=True
     ).filter(Attack.url != None, Attack.url != '')
     
@@ -35,8 +31,7 @@ def dashboard():
             (Attack.protocol.startswith(search_query)) |
             (Attack.honeypot_name.startswith(search_query)) |
             (URL.threat_names.startswith(search_query)) |
-            (Attack.date.startswith(search_query)) |
-            (URL.shasum.startswith(search_query))
+            (Attack.date.startswith(search_query)) 
         )
     links_paginated = links_query.paginate(page=links_page, per_page=per_page, error_out=False)
     
@@ -47,13 +42,6 @@ def dashboard():
         Attack.protocol, 
         Attack.honeypot_name, 
         Download.type, 
-        Download.reputation, 
-        Download.times_submitted, 
-        Download.popular_label, 
-        Download.times_submitted, 
-        Download.reputation,
-        Download.malicious_flags
-
     ).join(Download, Attack.md5 == Download.md5, isouter=True
     ).filter(Attack.md5 != None, Attack.md5 != '')
     

@@ -25,17 +25,17 @@
 </div>
 
 <!-- Charts -->
-<div class="chart-container">
+<!-- <div class="chart-container">
   <canvas id="dailyUrlsChart"></canvas>
 </div>
-
-<div class="chart-container">
+  -->
+<!-- <div class="chart-container">
   <canvas id="dailyPayloadsChart"></canvas>
-</div>
+</div>-->
 
-<div class="chart-container">
+ <!-- <div class="chart-container">
   <canvas id="combinedChart"></canvas>
-</div>
+</div> -->
 
 <!-- Pie Charts: Honeypot and Protocol -->
 <div class="pie-charts-container">
@@ -208,7 +208,7 @@
       }
   });
 
-  // Combined chart: sum the daily URLs and payloads. No onClick here.
+  // Combined chart: sum the daily URLs and payloads. 
   var ctxCombined = document.getElementById('combinedChart').getContext('2d');
   var combinedChart = new Chart(ctxCombined, {
       type: 'line',
