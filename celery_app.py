@@ -26,12 +26,13 @@ def make_celery(app):
 flask_app = create_app()  # Create your Flask app instance
 celery = make_celery(flask_app)
 
-celery.autodiscover_tasks(['tasks'])
+celery.autodiscover_tasks(['cyber_dashboard'])
+
 
 # In celery_app.py (or a dedicated celeryconfig.py)
 celery.conf.beat_schedule = {
     'update-statistics-every-10-minutes': {
-        'task': 'tasks.generate_static_statistics',
+        'task': 'cyber_dashboard.tasks.generate_static_statistics',
         'schedule': 600.0,  # 600 seconds = 10 minutes
     },
 }
