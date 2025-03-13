@@ -34,7 +34,7 @@ def get_dataset_duration():
             days = 1
     else:
         days = 1
-    return days
+    return days - 18
 
 @cache.memoize(timeout=600)
 def get_daily_time_series():
