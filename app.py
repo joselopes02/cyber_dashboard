@@ -1,7 +1,8 @@
 # app.py
 from flask import Flask , redirect, url_for
-from config import Config
-from models import db
+from .config import Config
+
+from .models import db
 from blueprints.dashboard import dashboard_bp
 from blueprints.statistics import statistics_bp
 from blueprints.documentation import documentation_bp
