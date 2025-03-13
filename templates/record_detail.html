@@ -39,8 +39,7 @@
       <p><strong>Malicious Flags:</strong> {{ record.malicious_flags }}</p>
       <p><strong>Times Submitted:</strong> {{ record.times_submitted }}</p>
       <p><strong>Reputation:</strong> {{ record.reputation }}</p>
-      <p><strong>SHASUM:</strong> {{ record.shasum }}</p>
-
+   
         <button onclick="copyShasum('{{ record.shasum }}')">Copy SHASUM</button>
         <button onclick="redirectToVirusTotal('{{ record.url }}')">View on VirusTotal</button>
      
