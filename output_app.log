@@ -1,0 +1,8 @@
+nohup: ignoring input
+[2025-03-13 17:58:26 +0100] [536008] [INFO] Starting gunicorn 20.1.0
+[2025-03-13 17:58:26 +0100] [536008] [INFO] Listening at: http://0.0.0.0:8888 (536008)
+[2025-03-13 17:58:26 +0100] [536008] [INFO] Using worker: sync
+[2025-03-13 17:58:26 +0100] [536009] [INFO] Booting worker with pid: 536009
+[2025-03-13 18:02:06 +0100] [536008] [CRITICAL] WORKER TIMEOUT (pid:536009)
+[2025-03-13 18:02:08 +0100] [536008] [WARNING] Worker with pid 536009 was terminated due to signal 9
+[2025-03-13 18:02:08 +0100] [538519] [INFO] Booting worker with pid: 538519

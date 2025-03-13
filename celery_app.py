@@ -4,9 +4,12 @@ from app import create_app  # Assuming you have a Flask app factory in app.py
 
 def make_celery(app):
     celery = Celery(app.import_name,
-                    broker=app.config['CELERY_BROKER_URL'],
-                    backend=app.config['CELERY_RESULT_BACKEND'])
-    celery.conf.update(app.config)
+                    broker=app.config['BROKER_URL'],
+                    backend=app.config['RESULT_BACKEND'])
+    celery.conf.update({
+        'broker_url': app.config['BROKER_URL'],
+        'result_backend': app.config['RESULT_BACKEND']
+    })
     TaskBase = celery.Task
 
     class ContextTask(TaskBase):

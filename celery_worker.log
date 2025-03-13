@@ -1,0 +1,166 @@
+nohup: ignoring input
+ 
+ -------------- celery@vmi2435825 v5.4.0 (opalescent)
+--- ***** ----- 
+-- ******* ---- Linux-6.8.0-55-generic-x86_64-with-glibc2.39 2025-03-13 17:58:46
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         app:0x709d0e1c6a50
+- ** ---------- .> transport:   redis://localhost:8889/0
+- ** ---------- .> results:     redis://localhost:8889/0
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+
+
+[2025-03-13 17:58:46,280: INFO/Beat] beat: Starting...
+[2025-03-13 17:58:47,468: WARNING/MainProcess] /home/user1/app/cyber_dashboard/venv/lib/python3.12/site-packages/celery/worker/consumer/consumer.py:508: CPendingDeprecationWarning: The broker_connection_retry configuration setting will no longer determine
+whether broker connection retries are made during startup in Celery 6.0 and above.
+If you wish to retain the existing behavior for retrying connections on startup,
+you should set broker_connection_retry_on_startup to True.
+  warnings.warn(
+
+[2025-03-13 17:58:47,484: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 2.00 seconds... (1/100)
+
+[2025-03-13 17:58:49,487: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 4.00 seconds... (2/100)
+
+[2025-03-13 17:58:53,489: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 6.00 seconds... (3/100)
+
+[2025-03-13 17:58:59,493: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 8.00 seconds... (4/100)
+
+[2025-03-13 17:59:07,498: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 10.00 seconds... (5/100)
+
+[2025-03-13 17:59:17,503: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 12.00 seconds... (6/100)
+
+[2025-03-13 17:59:29,511: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 14.00 seconds... (7/100)
+
+[2025-03-13 17:59:43,520: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 16.00 seconds... (8/100)
+
+[2025-03-13 17:59:59,527: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 18.00 seconds... (9/100)
+
+[2025-03-13 18:00:17,563: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 20.00 seconds... (10/100)
+
+[2025-03-13 18:00:37,569: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 22.00 seconds... (11/100)
+
+[2025-03-13 18:00:59,576: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 24.00 seconds... (12/100)
+
+[2025-03-13 18:01:23,591: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 26.00 seconds... (13/100)
+
+[2025-03-13 18:01:49,601: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 28.00 seconds... (14/100)
+
+[2025-03-13 18:02:17,623: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 30.00 seconds... (15/100)
+
+[2025-03-13 18:02:47,637: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:03:19,655: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:03:51,676: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:04:23,713: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:04:55,743: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:05:27,796: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:06:44,953: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Connection closed by server..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:07:16,967: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:07:48,974: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:08:20,998: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:08:46,330: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 2.0 seconds...
+[2025-03-13 18:08:48,333: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 4.0 seconds...
+[2025-03-13 18:08:52,336: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 6.0 seconds...
+[2025-03-13 18:08:53,015: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:08:58,339: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 8.0 seconds...
+[2025-03-13 18:09:06,345: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 10.0 seconds...
+[2025-03-13 18:09:16,350: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 12.0 seconds...
+[2025-03-13 18:09:25,032: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:09:28,355: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 14.0 seconds...
+[2025-03-13 18:09:42,361: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 16.0 seconds...
+[2025-03-13 18:09:57,042: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:09:58,367: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 18.0 seconds...
+[2025-03-13 18:10:16,381: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 20.0 seconds...
+[2025-03-13 18:10:29,073: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:10:36,388: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 22.0 seconds...
+[2025-03-13 18:10:58,395: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 24.0 seconds...
+[2025-03-13 18:11:01,082: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:11:22,402: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 26.0 seconds...
+[2025-03-13 18:11:33,095: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:11:48,410: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 28.0 seconds...
+[2025-03-13 18:12:05,105: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:12:16,419: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 30.0 seconds...
+[2025-03-13 18:12:37,114: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:12:46,427: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 32.0 seconds...
+[2025-03-13 18:13:09,127: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:13:18,447: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 32.0 seconds...
+[2025-03-13 18:13:41,138: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:13:50,460: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 32.0 seconds...
+[2025-03-13 18:14:13,148: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:14:22,471: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 32.0 seconds...
+[2025-03-13 18:14:45,156: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:14:54,480: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 32.0 seconds...
+[2025-03-13 18:15:17,191: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:15:26,519: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 32.0 seconds...
+[2025-03-13 18:15:49,206: ERROR/MainProcess] consumer: Cannot connect to redis://localhost:8889/0: Error 111 connecting to localhost:8889. Connection refused..
+Trying again in 32.00 seconds... (16/100)
+
+[2025-03-13 18:15:58,532: ERROR/Beat] beat: Connection error: Error 111 connecting to localhost:8889. Connection refused.. Trying again in 32.0 seconds...
