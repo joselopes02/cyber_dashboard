@@ -1,7 +1,7 @@
 # tasks.py
 import os
 import json
-from celery_app import celery
+from .celery_app import celery
 from flask import current_app, render_template
 from statistics_helpers import (
     get_total_counts,
