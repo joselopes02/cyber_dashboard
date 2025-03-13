@@ -1,7 +1,6 @@
 # celery_app.py
 from celery import Celery
 from app import create_app  # Assuming you have a Flask app factory in app.py
-from tasks import generate_static_statistics
 
 
 def make_celery(app):
@@ -26,6 +25,9 @@ def make_celery(app):
 
 flask_app = create_app()  # Create your Flask app instance
 celery = make_celery(flask_app)
+
+celery.autodiscover_tasks(['tasks'])
+
 # In celery_app.py (or a dedicated celeryconfig.py)
 celery.conf.beat_schedule = {
     'update-statistics-every-10-minutes': {
