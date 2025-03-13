@@ -1,6 +1,6 @@
 # celery_app.py
 from celery import Celery
-from app import create_app  # Assuming you have a Flask app factory in app.py
+from .app import create_app  # Assuming you have a Flask app factory in app.py
 
 
 def make_celery(app):
