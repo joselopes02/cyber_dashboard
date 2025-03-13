@@ -60,7 +60,7 @@ def dashboard():
     print(attacks_union)
     rows = db.session.query(attacks_union).limit(5).all()
     for row in rows:
-        print(dict(row))
+        print(dict(row._mapping))
     
     links_query = db.session.query(
         attacks_union.date,
