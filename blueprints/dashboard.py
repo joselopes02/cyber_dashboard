@@ -59,41 +59,41 @@ def dashboard():
     attacks_union = get_attacks_union()
     
     links_query = db.session.query(
-        attacks_union.c.date,
-        attacks_union.c.url,
-        attacks_union.c.protocol,
-        attacks_union.c.honeypot_name,
+        attacks_union.date,
+        attacks_union.url,
+        attacks_union.protocol,
+        attacks_union.honeypot_name,
         URL.threat_names,
         URL.shasum,
-    ).join(URL, attacks_union.c.url == URL.url, isouter=True
-    ).filter(attacks_union.c.url != None, attacks_union.c.url != '')
+    ).join(URL, attacks_union.url == URL.url, isouter=True
+    ).filter(attacks_union.url != None, attacks_union.url != '')
     
     if search_query:
         links_query = links_query.filter(
-            (attacks_union.c.url.startswith(search_query)) |
-            (attacks_union.c.protocol.startswith(search_query)) |
-            (attacks_union.c.honeypot_name.startswith(search_query)) |
+            (attacks_union.url.startswith(search_query)) |
+            (attacks_union.protocol.startswith(search_query)) |
+            (attacks_union.honeypot_name.startswith(search_query)) |
             (URL.threat_names.startswith(search_query)) |
-            (attacks_union.c.date.startswith(search_query)) 
+            (attacks_union.date.startswith(search_query)) 
         )
     links_paginated = links_query.paginate(page=links_page, per_page=per_page, error_out=False)
     
     payloads_query = db.session.query(
-        attacks_union.c.date,
-        attacks_union.c.md5,
-        attacks_union.c.protocol,
-        attacks_union.c.honeypot_name,
+        attacks_union.date,
+        attacks_union.md5,
+        attacks_union.protocol,
+        attacks_union.honeypot_name,
         Download.type,
-    ).join(Download, attacks_union.c.md5 == Download.md5, isouter=True
-    ).filter(attacks_union.c.md5 != None, attacks_union.c.md5 != '')
+    ).join(Download, attacks_union.md5 == Download.md5, isouter=True
+    ).filter(attacks_union.md5 != None, attacks_union.md5 != '')
     
     if search_query:
         payloads_query = payloads_query.filter(
-            (attacks_union.c.md5.startswith(search_query)) |
+            (attacks_union.md5.startswith(search_query)) |
             (Download.type.startswith(search_query)) |
-            (attacks_union.c.protocol.startswith(search_query)) |
-            (attacks_union.c.date.startswith(search_query)) |
-            (attacks_union.c.honeypot_name.startswith(search_query))
+            (attacks_union.protocol.startswith(search_query)) |
+            (attacks_union.date.startswith(search_query)) |
+            (attacks_union.honeypot_name.startswith(search_query))
         )
     payloads_paginated = payloads_query.paginate(page=payload_page, per_page=per_page, error_out=False)
     
