@@ -2,3 +2,5 @@ Flask==2.2.5
 Flask-SQLAlchemy==3.0.3
 Flask-Caching==1.11.1
 Gunicorn==20.1.0
+celery
+redis
