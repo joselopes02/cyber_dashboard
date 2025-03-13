@@ -10,4 +10,5 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
         # Celery configuration
     CELERY_BROKER_URL = 'redis://localhost:8889/0'
-    CELERY_RESULT_BACKEND = 'redis://localhost:8889/0'
+    CELERY_RESULT_BACKEND = 'redis://localhost:8889/0'    broker_url  = 'redis://localhost:8889/0'
+    result_backend  = 'redis://localhost:8889/0'
