@@ -16,7 +16,7 @@ def extract_domain(url):
     parsed = urlparse(url)
     return parsed.hostname
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_total_counts():
     url_count = URL.query.count()
     attack_url_count = Attack.query.filter(Attack.url != None, Attack.url != '').count()
@@ -24,7 +24,7 @@ def get_total_counts():
     download_count = Download.query.count()
     return url_count, attack_url_count, attack_md5_count, download_count
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_dataset_duration():
     valid_date = (Attack.date != None, Attack.date != '')
     min_date_str = db.session.query(func.min(Attack.date)).filter(*valid_date).scalar()
@@ -40,7 +40,7 @@ def get_dataset_duration():
         days = 1
     return days
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_daily_time_series():
     valid_date = (Attack.date != None, Attack.date != '')
     valid_url  = (Attack.url != None, Attack.url != '')
@@ -68,7 +68,7 @@ def get_daily_time_series():
     
     return daily_url_labels, daily_url_counts, daily_payload_labels, daily_payload_counts, all_days, combined_total
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_top_domains():
     valid_url = (Attack.url != None, Attack.url != '')
     attack_urls = db.session.query(Attack.url).filter(*valid_url).all()
@@ -83,7 +83,7 @@ def get_top_domains():
     top_domains = sorted(domain_counts.items(), key=lambda x: x[1], reverse=True)[:10]
     return top_domains
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_top_payloads():
     valid_md5 = (Attack.md5 != None, Attack.md5 != '')
     attack_md5s = db.session.query(Attack.md5).filter(*valid_md5).all()
@@ -95,7 +95,7 @@ def get_top_payloads():
     top_payloads = sorted(payload_counts.items(), key=lambda x: x[1], reverse=True)[:10]
     return top_payloads
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_pie_chart_data():
     # Honeypot Distribution
     honeypot_stats = db.session.query(
@@ -115,7 +115,7 @@ def get_pie_chart_data():
     
     return honeypot_labels, honeypot_counts, protocol_labels, protocol_counts
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_location_data():
     locations = db.session.query(Attack.latitude, Attack.longitude)\
                     .filter(Attack.latitude != None, Attack.longitude != None)\
@@ -123,7 +123,7 @@ def get_location_data():
     location_data = [{"lat": loc[0], "lng": loc[1]} for loc in locations]
     return location_data
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_top_threat_tokens():
     urls_with_threats = URL.query.filter(URL.threat_names != None, URL.threat_names != '').all()
     threat_tokens = Counter()
@@ -132,7 +132,7 @@ def get_top_threat_tokens():
         threat_tokens.update(tokens)
     return threat_tokens.most_common(10)
 
-@cache.memoize(timeout=180)
+@cache.memoize(timeout=600)
 def get_top_popular_labelcounts():
     downloads_with_labels = Download.query.filter(Download.popular_label != None, Download.popular_label != '').all()
     popular_labels = Counter()
@@ -142,7 +142,7 @@ def get_top_popular_labelcounts():
     return popular_labels.most_common(10)
 
 @statistics_bp.route('/')
-@cache.cached(timeout=180)
+@cache.cached(timeout=600)
 def statistics():
     # Retrieve pre-aggregated data from the cache
     url_count, attack_url_count, attack_md5_count, download_count = get_total_counts()

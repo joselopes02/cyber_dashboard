@@ -6,7 +6,7 @@ from extensions import cache
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 @dashboard_bp.route('/')
-@cache.cached(timeout=180, query_string=True)
+@cache.cached(timeout=600, query_string=True)
 def dashboard():
     # Retrieve parameters from the query string
     search_query = request.args.get('search', '')
@@ -67,7 +67,7 @@ def dashboard():
     )
 
 @dashboard_bp.route('/record/<record_type>/<identifier>')
-@cache.cached(timeout=180)
+@cache.cached(timeout=600)
 def record_detail(record_type, identifier):
     if record_type == 'link':
 
