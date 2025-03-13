@@ -25,31 +25,31 @@
 </div>
 
 <!-- Charts -->
- <!--<div class="chart-container">
+<div class="chart-container">
   <canvas id="dailyUrlsChart"></canvas>
 </div>
-  
- <div class="chart-container">
+<div class="chart-container">
   <canvas id="dailyPayloadsChart"></canvas>
 </div>
-
- <div class="chart-container">
+<div class="chart-container">
   <canvas id="combinedChart"></canvas>
-</div> -->
+</div> 
 
 <!-- Pie Charts: Honeypot and Protocol -->
-<!-- <div class="pie-charts-container">
-    <div class="one_pie_chart-container">
-      <canvas id="honeypotPieChart"></canvas>
-    </div>
-    <div class="one_pie_chart-container">
-      <canvas id="protocolPieChart"></canvas>
-    </div>
-  </div>-->
+<div class="pie-charts-container">
+  <div class="one_pie_chart-container">
+    <canvas id="honeypotPieChart"></canvas>
+  </div>
+  <div class="one_pie_chart-container">
+    <canvas id="protocolPieChart"></canvas>
+  </div>
+</div>
+
 <!-- Map for Attack Locations -->
- <!-- <div class="chart-container">
-    <div id="attackLocationsMap" style="height: 500px;"></div>
-  </div> -->
+<div class="chart-container">
+  <div id="attackLocationsMap" style="height: 500px;"></div>
+</div> 
+
 <!-- Top Domains Board -->
 <div class="stat-box" style="margin: 40px auto; max-width:800px;">
   <h2>Top 10 Most Used Domains</h2>
@@ -70,247 +70,261 @@
     </tbody>
   </table>
 </div>
+
 <!-- Top Payloads Board -->
 <div class="stat-box" style="margin: 40px auto; max-width:800px;">
-    <h2>Top 10 Most Used Payloads</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Payload (MD5)</th>
-          <th>Count</th>
-        </tr>
-      </thead>
+  <h2>Top 10 Most Used Payloads</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Payload (MD5)</th>
+        <th>Count</th>
+      </tr>
+    </thead>
       <tbody>
         {% for md5, count in top_payloads %}
         <tr onclick="window.location.href='{{ url_for('dashboard.dashboard', view='payload', search=md5, links_page=1, payload_page=1, per_page=20) }}'" style="cursor:pointer;">
-            <td>{{ md5 }}</td>
-            <td>{{ count }}</td>
-          </tr>
+          <td>{{ md5 }}</td>
+          <td>{{ count }}</td>
+        </tr>
         {% endfor %}
       </tbody>
-    </table>
-  </div>
+  </table>
+</div>
+
 <!-- Top Threat Tokens Board -->
 <div class="stat-box" style="margin: 40px auto; max-width:800px;">
-    <h2>Top 10 Threat Tag</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Threat Token</th>
-          <th>Count</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for token, count in top_threat_tokens %}
-        <tr onclick="window.location.href='{{ url_for('dashboard.dashboard', view='links', search=token, links_page=1, payload_page=1, per_page=20) }}'" style="cursor:pointer;">
-          <td>{{ token }}</td>
-          <td>{{ count }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div> 
-  <!-- Top Threat Tokens Board -->
+  <h2>Top 10 Threat Tag</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Threat Token</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for token, count in top_threat_tokens %}
+      <tr onclick="window.location.href='{{ url_for('dashboard.dashboard', view='links', search=token, links_page=1, payload_page=1, per_page=20) }}'" style="cursor:pointer;">
+        <td>{{ token }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div> 
+
+<!-- Top Payload Popular Tag Board -->
 <div class="stat-box" style="margin: 40px auto; max-width:800px;">
-    <h2>Top 10 Payload Popular Tag</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Threat Token</th>
-          <th>Count</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for token, count in top_popular_labelcounts %}
-        <tr>
-          <td>{{ token }}</td>
-          <td>{{ count }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  <h2>Top 10 Payload Popular Tag</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Threat Token</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for token, count in top_popular_labelcounts %}
+      <tr>
+        <td>{{ token }}</td>
+        <td>{{ count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 <script>
-  // Parse JSON data passed from the route.
-  var dailyUrlLabels = {{ daily_url_labels | safe }};
-  var dailyUrlCounts = {{ daily_url_counts | safe }};
-  var dailyPayloadLabels = {{ daily_payload_labels | safe }};
-  var dailyPayloadCounts = {{ daily_payload_counts | safe }};
-  var combinedDays = {{ combined_days | safe }};
-  var combinedTotal = {{ combined_total | safe }};
-  
-  var honeypotLabels = {{ honeypot_labels | safe }};
-  var honeypotCounts = {{ honeypot_counts | safe }};
-  var protocolLabels = {{ protocol_labels | safe }};
-  var protocolCounts = {{ protocol_counts | safe }};
+// Wrap initialization to run after the DOM is ready
+document.addEventListener("DOMContentLoaded", function() {
+  // Use IntersectionObserver to lazy-load charts when they come into view
+  const observerOptions = {
+    root: null,
+    rootMargin: "0px",
+    threshold: 0.1
+  };
 
-  // Chart for daily distinct URLs with onClick handler.
-  var ctxUrls = document.getElementById('dailyUrlsChart').getContext('2d');
-  var dailyUrlsChart = new Chart(ctxUrls, {
+  const chartColorPalette = [
+    'rgba(255, 99, 132, 0.6)',
+    'rgba(54, 162, 235, 0.6)',
+    'rgba(255, 206, 86, 0.6)',
+    'rgba(75, 192, 192, 0.6)',
+    'rgba(153, 102, 255, 0.6)',
+    'rgba(255, 159, 64, 0.6)'
+  ];
+
+  function initDailyUrlsChart() {
+    const ctx = document.getElementById('dailyUrlsChart').getContext('2d');
+    new Chart(ctx, {
       type: 'line',
       data: {
-          labels: dailyUrlLabels,
-          datasets: [{
-              label: 'Distinct URLs per Day',
-              data: dailyUrlCounts,
-              borderColor: 'rgba(255, 85, 85, 1)',
-              backgroundColor: 'rgba(255, 85, 85, 0.2)',
-              fill: true
-          }]
+        labels: {{ daily_url_labels | safe }},
+        datasets: [{
+          label: 'Distinct URLs per Day',
+          data: {{ daily_url_counts | safe }},
+          borderColor: 'rgba(255, 85, 85, 1)',
+          backgroundColor: 'rgba(255, 85, 85, 0.2)',
+          fill: true
+        }]
       },
       options: {
-          onClick: function(evt, activeElements) {
-              if (activeElements.length > 0) {
-                  var index = activeElements[0].index;
-                  var day = dailyUrlLabels[index];
-                  // Redirect to dashboard for "links" view filtering by the clicked day.
-                  window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(day);
-              }
-          },
-          scales: {
-              y: { beginAtZero: true, title: { display: true, text: 'Count' } }
-          },
-          plugins: {
-              title: { display: true, text: 'Daily Distinct URLs' }
+        onClick: function(evt, activeElements) {
+          if (activeElements.length > 0) {
+            var index = activeElements[0].index;
+            var day = this.data.labels[index];
+            window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(day);
           }
+        },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+        },
+        plugins: { title: { display: true, text: 'Daily Distinct URLs' } }
       }
-  });
+    });
+  }
 
-  // Chart for daily distinct payloads with onClick handler.
-  var ctxPayloads = document.getElementById('dailyPayloadsChart').getContext('2d');
-  var dailyPayloadsChart = new Chart(ctxPayloads, {
+  function initDailyPayloadsChart() {
+    const ctx = document.getElementById('dailyPayloadsChart').getContext('2d');
+    new Chart(ctx, {
       type: 'line',
       data: {
-          labels: dailyPayloadLabels,
-          datasets: [{
-              label: 'Distinct Payloads per Day',
-              data: dailyPayloadCounts,
-              borderColor: 'rgba(75, 192, 192, 1)',
-              backgroundColor: 'rgba(75, 192, 192, 0.2)',
-              fill: true
-          }]
+        labels: {{ daily_payload_labels | safe }},
+        datasets: [{
+          label: 'Distinct Payloads per Day',
+          data: {{ daily_payload_counts | safe }},
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: true
+        }]
       },
       options: {
-          onClick: function(evt, activeElements) {
-              if (activeElements.length > 0) {
-                  var index = activeElements[0].index;
-                  var day = dailyPayloadLabels[index];
-                  // Redirect to dashboard for "payload" view filtering by the clicked day.
-                  window.location.href = "/dashboard/?view=payload&search=" + encodeURIComponent(day);
-              }
-          },
-          scales: {
-              y: { beginAtZero: true, title: { display: true, text: 'Count' } }
-          },
-          plugins: {
-              title: { display: true, text: 'Daily Distinct Payloads' }
+        onClick: function(evt, activeElements) {
+          if (activeElements.length > 0) {
+            var index = activeElements[0].index;
+            var day = this.data.labels[index];
+            window.location.href = "/dashboard/?view=payload&search=" + encodeURIComponent(day);
           }
+        },
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+        },
+        plugins: { title: { display: true, text: 'Daily Distinct Payloads' } }
       }
-  });
+    });
+  }
 
-  // Combined chart: sum the daily URLs and payloads. 
-  var ctxCombined = document.getElementById('combinedChart').getContext('2d');
-  var combinedChart = new Chart(ctxCombined, {
+  function initCombinedChart() {
+    const ctx = document.getElementById('combinedChart').getContext('2d');
+    new Chart(ctx, {
       type: 'line',
       data: {
-          labels: combinedDays,
-          datasets: [{
-              label: 'Combined Daily Total',
-              data: combinedTotal,
-              borderColor: 'rgba(255, 206, 86, 1)',
-              backgroundColor: 'rgba(255, 206, 86, 0.2)',
-              fill: true
-          }]
+        labels: {{ combined_days | safe }},
+        datasets: [{
+          label: 'Combined Daily Total',
+          data: {{ combined_total | safe }},
+          borderColor: 'rgba(255, 206, 86, 1)',
+          backgroundColor: 'rgba(255, 206, 86, 0.2)',
+          fill: true
+        }]
       },
       options: {
-          scales: {
-              y: { beginAtZero: true, title: { display: true, text: 'Count' } }
-          },
-          plugins: {
-              title: { display: true, text: 'Combined Daily Distinct Count (URLs + Payloads)' }
-          }
+        scales: {
+          y: { beginAtZero: true, title: { display: true, text: 'Count' } }
+        },
+        plugins: { title: { display: true, text: 'Combined Daily Distinct Count (URLs + Payloads)' } }
       }
-  });
+    });
+  }
 
-  // Honeypot Pie Chart with onClick: redirects using the clicked honeypot as search filter.
-  var ctxHoneypot = document.getElementById('honeypotPieChart').getContext('2d');
-  var honeypotPieChart = new Chart(ctxHoneypot, {
+  function initHoneypotPieChart() {
+    const ctx = document.getElementById('honeypotPieChart').getContext('2d');
+    new Chart(ctx, {
       type: 'pie',
       data: {
-          labels: honeypotLabels,
-          datasets: [{
-              data: honeypotCounts,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.6)',
-                  'rgba(54, 162, 235, 0.6)',
-                  'rgba(255, 206, 86, 0.6)',
-                  'rgba(75, 192, 192, 0.6)',
-                  'rgba(153, 102, 255, 0.6)',
-                  'rgba(255, 159, 64, 0.6)'
-              ]
-          }]
+        labels: {{ honeypot_labels | safe }},
+        datasets: [{
+          data: {{ honeypot_counts | safe }},
+          backgroundColor: chartColorPalette
+        }]
       },
       options: {
-          onClick: function(evt, activeElements) {
-              if(activeElements.length > 0){
-                  var index = activeElements[0].index;
-                  var honeypot = honeypotLabels[index];
-                  window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(honeypot);
-              }
-          },
-          plugins: {
-              title: { display: true, text: 'Honeypot Distribution' }
+        onClick: function(evt, activeElements) {
+          if(activeElements.length > 0){
+            var index = activeElements[0].index;
+            var honeypot = this.data.labels[index];
+            window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(honeypot);
           }
+        },
+        plugins: { title: { display: true, text: 'Honeypot Distribution' } }
       }
-  });
+    });
+  }
 
-  // Protocol Pie Chart with onClick: redirects using the clicked protocol as search filter.
-  var ctxProtocol = document.getElementById('protocolPieChart').getContext('2d');
-  var protocolPieChart = new Chart(ctxProtocol, {
+  function initProtocolPieChart() {
+    const ctx = document.getElementById('protocolPieChart').getContext('2d');
+    new Chart(ctx, {
       type: 'pie',
       data: {
-          labels: protocolLabels,
-          datasets: [{
-              data: protocolCounts,
-              backgroundColor: [
-                  'rgba(255, 99, 132, 0.6)',
-                  'rgba(54, 162, 235, 0.6)',
-                  'rgba(255, 206, 86, 0.6)',
-                  'rgba(75, 192, 192, 0.6)',
-                  'rgba(153, 102, 255, 0.6)',
-                  'rgba(255, 159, 64, 0.6)'
-              ]
-          }]
+        labels: {{ protocol_labels | safe }},
+        datasets: [{
+          data: {{ protocol_counts | safe }},
+          backgroundColor: chartColorPalette
+        }]
       },
       options: {
-          onClick: function(evt, activeElements) {
-              if(activeElements.length > 0){
-                  var index = activeElements[0].index;
-                  var protocol = protocolLabels[index];
-                  window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(protocol);
-              }
-          },
-          plugins: {
-              title: { display: true, text: 'Protocol Distribution' }
+        onClick: function(evt, activeElements) {
+          if(activeElements.length > 0){
+            var index = activeElements[0].index;
+            var protocol = this.data.labels[index];
+            window.location.href = "/dashboard/?view=links&search=" + encodeURIComponent(protocol);
           }
+        },
+        plugins: { title: { display: true, text: 'Protocol Distribution' } }
       }
-  });
+    });
+  }
 
-  var locationData = {{ location_data | safe }};
-  var map = L.map('attackLocationsMap').setView([0, 0], 2);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-  subdomains: 'abcd',
-  maxZoom: 19
-}).addTo(map);
+  function initMap() {
+    const map = L.map('attackLocationsMap').setView([0, 0], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 19
+    }).addTo(map);
 
-  var markers = L.markerClusterGroup();
-  locationData.forEach(function(loc) {
+    var markers = L.markerClusterGroup();
+    var locationData = {{ location_data | safe }};
+    locationData.forEach(function(loc) {
       if (loc.lat && loc.lng) {
-          var marker = L.marker([loc.lat, loc.lng]);
-          markers.addLayer(marker);
+        var marker = L.marker([loc.lat, loc.lng]);
+        markers.addLayer(marker);
       }
-  });
-  map.addLayer(markers);
+    });
+    map.addLayer(markers);
+  }
+
+  // Generic function to observe when an element is visible then initialize its content.
+  function observeAndInit(elementId, initFunction) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          initFunction();
+          obs.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+    observer.observe(element);
+  }
+
+  // Lazy-load charts when they are about to come into view.
+  observeAndInit('dailyUrlsChart', initDailyUrlsChart);
+  observeAndInit('dailyPayloadsChart', initDailyPayloadsChart);
+  observeAndInit('combinedChart', initCombinedChart);
+  observeAndInit('honeypotPieChart', initHoneypotPieChart);
+  observeAndInit('protocolPieChart', initProtocolPieChart);
+  observeAndInit('attackLocationsMap', initMap);
+});
 </script>
 {% endblock %}
