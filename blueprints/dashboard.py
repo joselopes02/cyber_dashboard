@@ -57,6 +57,10 @@ def dashboard():
     per_page = int(request.args.get('per_page', 20))
     
     attacks_union = get_attacks_union()
+    print(attacks_union)
+    rows = db.session.query(attacks_union).limit(5).all()
+    for row in rows:
+        print(dict(row))
     
     links_query = db.session.query(
         attacks_union.date,
