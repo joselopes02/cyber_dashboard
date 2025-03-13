@@ -8,43 +8,44 @@ dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 def get_attacks_union():
     attack_query = db.session.query(
-        Attack.id,
-        Attack.date,
-        Attack.source_ip,
-        Attack.source_port,
-        Attack.url,
-        Attack.protocol,
-        Attack.honeypot_name,
-        Attack.md5,
-        Attack.honeypot_ip,
-        Attack.honeypot_service,
-        Attack.city,
-        Attack.country_name,
-        Attack.continent,
-        Attack.org,
-        Attack.latitude,
-        Attack.longitude
+        Attack.id.label("id"),
+        Attack.date.label("date"),
+        Attack.source_ip.label("source_ip"),
+        Attack.source_port.label("source_port"),
+        Attack.url.label("url"),
+        Attack.protocol.label("protocol"),
+        Attack.honeypot_name.label("honeypot_name"),
+        Attack.md5.label("md5"),
+        Attack.honeypot_ip.label("honeypot_ip"),
+        Attack.honeypot_service.label("honeypot_service"),
+        Attack.city.label("city"),
+        Attack.country_name.label("country_name"),
+        Attack.continent.label("continent"),
+        Attack.org.label("org"),
+        Attack.latitude.label("latitude"),
+        Attack.longitude.label("longitude")
     )
     augmented_query = db.session.query(
-        Augmented_Attacks.id,
-        Augmented_Attacks.date,
-        Augmented_Attacks.source_ip,
-        Augmented_Attacks.source_port,
-        Augmented_Attacks.url,
-        Augmented_Attacks.protocol,
-        Augmented_Attacks.honeypot_name,
-        Augmented_Attacks.md5,
-        Augmented_Attacks.honeypot_ip,
-        Augmented_Attacks.honeypot_service,
-        Augmented_Attacks.city,
-        Augmented_Attacks.country_name,
-        Augmented_Attacks.continent,
-        Augmented_Attacks.org,
-        Augmented_Attacks.latitude,
-        Augmented_Attacks.longitude
+        Augmented_Attacks.id.label("id"),
+        Augmented_Attacks.date.label("date"),
+        Augmented_Attacks.source_ip.label("source_ip"),
+        Augmented_Attacks.source_port.label("source_port"),
+        Augmented_Attacks.url.label("url"),
+        Augmented_Attacks.protocol.label("protocol"),
+        Augmented_Attacks.honeypot_name.label("honeypot_name"),
+        Augmented_Attacks.md5.label("md5"),
+        Augmented_Attacks.honeypot_ip.label("honeypot_ip"),
+        Augmented_Attacks.honeypot_service.label("honeypot_service"),
+        Augmented_Attacks.city.label("city"),
+        Augmented_Attacks.country_name.label("country_name"),
+        Augmented_Attacks.continent.label("continent"),
+        Augmented_Attacks.org.label("org"),
+        Augmented_Attacks.latitude.label("latitude"),
+        Augmented_Attacks.longitude.label("longitude")
     )
     # Use union_all to combine both queries. If you need only distinct rows, use .union() instead.
     return attack_query.union_all(augmented_query).subquery()
+
 
 
 @dashboard_bp.route('/')
@@ -69,35 +70,35 @@ def dashboard():
         attacks_union.c.honeypot_name,
         URL.threat_names,
         URL.shasum,
-    ).join(URL, attacks_union.url == URL.url, isouter=True
-    ).filter(attacks_union.url != None, attacks_union.url != '')
+    ).join(URL, attacks_union.c.url == URL.url, isouter=True
+    ).filter(attacks_union.c.url != None, attacks_union.c.url != '')
     
     if search_query:
         links_query = links_query.filter(
-            (attacks_union.url.startswith(search_query)) |
-            (attacks_union.protocol.startswith(search_query)) |
-            (attacks_union.honeypot_name.startswith(search_query)) |
+            (attacks_union.c.url.startswith(search_query)) |
+            (attacks_union.c.protocol.startswith(search_query)) |
+            (attacks_union.c.honeypot_name.startswith(search_query)) |
             (URL.threat_names.startswith(search_query)) |
-            (attacks_union.date.startswith(search_query)) 
+            (attacks_union.c.date.startswith(search_query)) 
         )
     links_paginated = links_query.paginate(page=links_page, per_page=per_page, error_out=False)
     
     payloads_query = db.session.query(
-        attacks_union.date,
-        attacks_union.md5,
-        attacks_union.protocol,
-        attacks_union.honeypot_name,
+        attacks_union.c.date,
+        attacks_union.c.md5,
+        attacks_union.c.protocol,
+        attacks_union.c.honeypot_name,
         Download.type,
-    ).join(Download, attacks_union.md5 == Download.md5, isouter=True
-    ).filter(attacks_union.md5 != None, attacks_union.md5 != '')
+    ).join(Download, attacks_union.c.md5 == Download.md5, isouter=True
+    ).filter(attacks_union.c.md5 != None, attacks_union.c.md5 != '')
     
     if search_query:
         payloads_query = payloads_query.filter(
-            (attacks_union.md5.startswith(search_query)) |
+            (attacks_union.c.md5.startswith(search_query)) |
             (Download.type.startswith(search_query)) |
-            (attacks_union.protocol.startswith(search_query)) |
-            (attacks_union.date.startswith(search_query)) |
-            (attacks_union.honeypot_name.startswith(search_query))
+            (attacks_union.c.protocol.startswith(search_query)) |
+            (attacks_union.c.date.startswith(search_query)) |
+            (attacks_union.c.honeypot_name.startswith(search_query))
         )
     payloads_paginated = payloads_query.paginate(page=payload_page, per_page=per_page, error_out=False)
     
@@ -118,42 +119,42 @@ def record_detail(record_type, identifier):
     
     if record_type == 'link':
         record = db.session.query(
-                    attacks_union.date,
-                    attacks_union.source_ip,
-                    attacks_union.source_port,
-                    attacks_union.url,
-                    attacks_union.protocol,
-                    attacks_union.honeypot_name,
-                    attacks_union.latitude,      
-                    attacks_union.longitude, 
+                    attacks_union.c.date,
+                    attacks_union.c.source_ip,
+                    attacks_union.c.source_port,
+                    attacks_union.c.url,
+                    attacks_union.c.protocol,
+                    attacks_union.c.honeypot_name,
+                    attacks_union.c.latitude,      
+                    attacks_union.c.longitude, 
                     URL.threat_names,
                     URL.shasum,
                     URL.malicious_flags,
                     URL.times_submitted,
                     URL.reputation
-                ).join(URL, attacks_union.url == URL.url, isouter=True
+                ).join(URL, attacks_union.c.url == URL.url, isouter=True
                 ).filter(URL.shasum == identifier).first_or_404()
         download_record = Download.query.filter_by(sha256=record.shasum).first()
         return render_template('record_detail.html', record=record, record_type=record_type, download_record=download_record)
     
     elif record_type == 'payload':
         record = db.session.query(
-                    attacks_union.date, 
-                    attacks_union.md5,
-                    attacks_union.source_ip,
-                    attacks_union.source_port, 
-                    attacks_union.protocol, 
-                    attacks_union.honeypot_name,
-                    attacks_union.latitude,      
-                    attacks_union.longitude, 
+                    attacks_union.c.date, 
+                    attacks_union.c.md5,
+                    attacks_union.c.source_ip,
+                    attacks_union.c.source_port, 
+                    attacks_union.c.protocol, 
+                    attacks_union.c.honeypot_name,
+                    attacks_union.c.latitude,      
+                    attacks_union.c.longitude, 
                     Download.type, 
                     Download.reputation, 
                     Download.times_submitted, 
                     Download.file_size,
                     Download.popular_label, 
                     Download.malicious_flags
-                ).join(Download, attacks_union.md5 == Download.md5, isouter=True
-                ).filter(attacks_union.md5 == identifier).first_or_404()
+                ).join(Download, attacks_union.c.md5 == Download.md5, isouter=True
+                ).filter(attacks_union.c.md5 == identifier).first_or_404()
         return render_template('record_detail.html', record=record, record_type=record_type)
     else:
         abort(404)
