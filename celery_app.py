@@ -1,6 +1,8 @@
 # celery_app.py
 from celery import Celery
 from app import create_app  # Assuming you have a Flask app factory in app.py
+from tasks import generate_static_statistics
+
 
 def make_celery(app):
     celery = Celery(app.import_name,
