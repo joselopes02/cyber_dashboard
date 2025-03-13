@@ -39,6 +39,7 @@
       <p><strong>Malicious Flags:</strong> {{ record.malicious_flags }}</p>
       <p><strong>Times Submitted:</strong> {{ record.times_submitted }}</p>
       <p><strong>Reputation:</strong> {{ record.reputation }}</p>
+      <p><strong>SHASUM:</strong> {{ record.shasum }}</p>
 
         <button onclick="copyShasum('{{ record.shasum }}')">Copy SHASUM</button>
         <button onclick="redirectToVirusTotal('{{ record.url }}')">View on VirusTotal</button>
@@ -49,7 +50,7 @@
         <p><strong>MD5:</strong> {{ download_record.md5 }}</p>
         <p><strong>Popular Label:</strong> {{ download_record.popular_label }}</p>
         <p><strong>Type:</strong> {{ download_record.type }}</p>
-        <p><strong>File Size:</strong> {{ download_record.file_size }} b</p>
+        <p><strong>File Size:</strong> {{ download_record.file_size }} B</p>
         <p><strong>Times Submitted:</strong> {{ download_record.times_submitted }}</p>
         <p><strong>Reputation:</strong> {{ download_record.reputation }}</p>
         <p><strong>Malicious Flags:</strong> {{ download_record.malicious_flags }}</p>
