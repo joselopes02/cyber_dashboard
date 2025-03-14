@@ -80,6 +80,8 @@ def dashboard():
 
     # Links query optimized
     links_query = db.session.query(
+        attacks_union.c.id,                  # clearly add this line
+        attacks_union.c.source, 
         attacks_union.c.date,
         attacks_union.c.url,
         attacks_union.c.protocol,
