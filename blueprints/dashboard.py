@@ -6,6 +6,20 @@ from ..extensions import cache
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 
+
+# Encoding and decoding functions clearly defined:
+def simple_encode(url: str) -> str:
+    return url.replace(":", "%253A").replace("/", "%252F")
+
+def simple_decode(encoded_url: str) -> str:
+    return encoded_url.replace("%253A", ":").replace("%252F", "/")
+
+# Register custom Jinja filter directly:
+@dashboard_bp.app_template_filter('simple_encode')
+def simple_encode_filter(url: str):
+    return simple_encode(url)
+
+
 def get_attacks_union():
     attack_query = db.session.query(
         Attack.id.label("id"),
@@ -114,12 +128,23 @@ def dashboard():
         search_query=search_query
     )
 
-@dashboard_bp.route('/record/<record_type>/<identifier>')
+
+
+@dashboard_bp.app_template_filter('simple_encode')
+def simple_encode_filter(url: str):
+    return simple_encode(url)
+
+
+@dashboard_bp.route('/record/<record_type>/<path:identifier>')
 @cache.cached(timeout=600)
 def record_detail(record_type, identifier):
+    from urllib.parse import unquote
+    
     attacks_union = get_attacks_union()
     
     if record_type == 'link':
+        decoded_identifier = identifier.replace("%253A", ":").replace("%252F", "/")
+        
         record = db.session.query(
                     attacks_union.c.date,
                     attacks_union.c.source_ip,
@@ -138,7 +163,7 @@ def record_detail(record_type, identifier):
                 ).filter(attacks_union.c.url == identifier).first_or_404()
         download_record = Download.query.filter_by(sha256=record.shasum).first()
         return render_template('record_detail.html', record=record, record_type=record_type, download_record=download_record)
-    
+
     elif record_type == 'payload':
         record = db.session.query(
                     attacks_union.c.date, 
