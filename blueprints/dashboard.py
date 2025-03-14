@@ -59,7 +59,7 @@ def get_attacks_union():
         Augmented_Attacks.org.label("org"),
         Augmented_Attacks.latitude.label("latitude"),
         Augmented_Attacks.longitude.label("longitude"),
-        db.literal('augmented_attack').label('source')  # clearly added source field
+        db.literal('augmented_attack').label('source')  
     )
 
     return attack_query.union_all(augmented_query).subquery()
@@ -80,7 +80,7 @@ def dashboard():
 
     # Links query optimized
     links_query = db.session.query(
-        attacks_union.c.id,                  # clearly add this line
+        attacks_union.c.id,                  
         attacks_union.c.source, 
         attacks_union.c.date,
         attacks_union.c.url,
@@ -91,15 +91,16 @@ def dashboard():
     ).join(URL, attacks_union.c.url == URL.url, isouter=True)\
      .filter(attacks_union.c.url.isnot(None), attacks_union.c.url != '')
 
-    # Payload query optimized
     payloads_query = db.session.query(
-        attacks_union.c.date,
-        attacks_union.c.md5,
-        attacks_union.c.protocol,
-        attacks_union.c.honeypot_name,
-        Download.type,
+            attacks_union.c.id,                      # clearly required
+            attacks_union.c.source,                  # clearly added
+            attacks_union.c.date,
+            attacks_union.c.md5,
+            attacks_union.c.protocol,
+            attacks_union.c.honeypot_name,
+            Download.type
     ).join(Download, attacks_union.c.md5 == Download.md5, isouter=True
-    ).filter(attacks_union.c.md5 != None)
+    ).filter(attacks_union.c.md5.isnot(None), attacks_union.c.md5 != '')
 
     if search_query:
         search_like = f"{search_query}%"
