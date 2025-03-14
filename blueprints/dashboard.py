@@ -51,34 +51,26 @@ def get_attacks_union():
 @dashboard_bp.route('/')
 @cache.cached(timeout=600, query_string=True)
 def dashboard():
-    search_query = request.args.get('search', '')
+    search_query = request.args.get('search', '').strip()
     view = request.args.get('view', 'links')
     links_page = int(request.args.get('links_page', 1))
     payload_page = int(request.args.get('payload_page', 1))
     per_page = int(request.args.get('per_page', 20))
-    
+
     attacks_union = get_attacks_union()
 
+    # Links query optimized
     links_query = db.session.query(
         attacks_union.c.date,
         attacks_union.c.url,
         attacks_union.c.protocol,
         attacks_union.c.honeypot_name,
         URL.threat_names,
-        URL.shasum,
-    ).join(URL, attacks_union.c.url == URL.url, isouter=True
-    ).filter(attacks_union.c.url != None, attacks_union.c.url != '')
-    
-    if search_query:
-        links_query = links_query.filter(
-            (attacks_union.c.url.startswith(search_query)) |
-            (attacks_union.c.protocol.startswith(search_query)) |
-            (attacks_union.c.honeypot_name.startswith(search_query)) |
-            (URL.threat_names.startswith(search_query)) |
-            (attacks_union.c.date.startswith(search_query)) 
-        )
-    links_paginated = links_query.paginate(page=links_page, per_page=per_page, error_out=False)
-    
+        URL.shasum
+    ).join(URL, attacks_union.c.url == URL.url, isouter=True)\
+     .filter(attacks_union.c.url.isnot(None), attacks_union.c.url != '')
+
+    # Payload query optimized
     payloads_query = db.session.query(
         attacks_union.c.date,
         attacks_union.c.md5,
@@ -86,18 +78,32 @@ def dashboard():
         attacks_union.c.honeypot_name,
         Download.type,
     ).join(Download, attacks_union.c.md5 == Download.md5, isouter=True
-    ).filter(attacks_union.c.md5 != None, attacks_union.c.md5 != '')
-    
+    ).filter(attacks_union.c.md5 != None)
+
     if search_query:
-        payloads_query = payloads_query.filter(
-            (attacks_union.c.md5.startswith(search_query)) |
-            (Download.type.startswith(search_query)) |
-            (attacks_union.c.protocol.startswith(search_query)) |
-            (attacks_union.c.date.startswith(search_query)) |
-            (attacks_union.c.honeypot_name.startswith(search_query))
+        search_like = f"{search_query}%"
+        links_query = links_query.filter(
+            (attacks_union.c.url.ilike(search_query+'%')) |
+            (attacks_union.c.protocol.ilike(search_query+'%')) |
+            (attacks_union.c.honeypot_name.ilike(search_query)) |
+            (URL.threat_names.ilike(search_query)) |
+            (attacks_union.c.date.ilike(search_query))
         )
-    payloads_paginated = payloads_query.paginate(page=payload_page, per_page=per_page, error_out=False)
+
+        payloads_query = payloads_query.filter(
+            (attacks_union.c.md5.ilike(search_query)) |
+            (attacks_union.c.protocol.ilike(search_query)) |
+            (attacks_union.c.honeypot_name.ilike(search_query)) |
+            (Download.type.ilike(search_query)) |
+            (attacks_union.c.date.ilike(search_query))
+        )
+
+    links_paginated = links_query.order_by(attacks_union.c.date.desc()) \
+        .paginate(page=links_page, per_page=per_page, error_out=False)
     
+    payloads_paginated = payloads_query.order_by(attacks_union.c.date.desc()) \
+        .paginate(page=payload_page, per_page=per_page, error_out=False)
+
     return render_template(
         'dashboard.html',
         view=view,
