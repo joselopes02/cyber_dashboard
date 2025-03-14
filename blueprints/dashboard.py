@@ -150,7 +150,7 @@ def record_detail(record_type, source, identifier):
     attacks_union = get_attacks_union()
     
     if record_type == 'link':
-        decoded_identifier = identifier.replace("%253A", ":").replace("%252F", "/")
+        
         
         record = db.session.query(
                     attacks_union.c.id,
