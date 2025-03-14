@@ -144,7 +144,7 @@ def simple_encode_filter(url: str):
 
 @dashboard_bp.route('/record/<record_type>/<source>/<int:identifier>')
 @cache.cached(timeout=600)
-def record_detail(record_type, identifier):
+def record_detail(record_type, source, identifier):
     from urllib.parse import unquote
     
     attacks_union = get_attacks_union()
