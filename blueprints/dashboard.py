@@ -135,7 +135,7 @@ def record_detail(record_type, identifier):
                     URL.times_submitted,
                     URL.reputation
                 ).join(URL, attacks_union.c.url == URL.url, isouter=True
-                ).filter(URL.shasum == identifier).first_or_404()
+                ).filter(attacks_union.c.url == identifier).first_or_404()
         download_record = Download.query.filter_by(sha256=record.shasum).first()
         return render_template('record_detail.html', record=record, record_type=record_type, download_record=download_record)
     
