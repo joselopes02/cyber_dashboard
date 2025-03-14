@@ -183,6 +183,7 @@ def record_detail(record_type, source, identifier):
                     attacks_union.c.honeypot_name,
                     attacks_union.c.latitude,      
                     attacks_union.c.longitude, 
+                    attacks_union.c.source,
                     Download.type, 
                     Download.reputation, 
                     Download.times_submitted, 

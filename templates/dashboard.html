@@ -72,8 +72,8 @@
             </tr>
         </thead>
         <tbody>
-            {% for row in payloads %}
-            <tr onclick="window.location.href='{{ url_for('dashboard.record_detail', record_type='payload', identifier=row.md5) }}'">
+            {% for row in payloads %} 
+            <tr onclick="window.location.href='{{ url_for('dashboard.record_detail', record_type='payload', source=row.source, identifier=row.id) }}'">
                 <td>{{ row.date[:10] }}</td>
                 <td>{{ row.md5 }}</td>
                 <td>{{ row.protocol }}</td>
