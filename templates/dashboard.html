@@ -39,7 +39,7 @@
         </thead>
         <tbody>
             {% for row in links %}
-            <tr onclick="window.location.href='{{ url_for('dashboard.record_detail', record_type='link', identifier=identifier=row.url|simple_encode) }}'">
+            <tr onclick="window.location.href='{{ url_for('dashboard.record_detail', record_type='link', identifier=row.url|simple_encode) }}'">
                 <td>{{ row.date[:10] }}</td>
                 <td>{{ row.url }}</td>
                 <td>{{ row.protocol }}</td>
