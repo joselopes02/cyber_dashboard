@@ -146,53 +146,58 @@ def simple_encode_filter(url: str):
 @dashboard_bp.route('/record/<record_type>/<source>/<int:identifier>')
 @cache.cached(timeout=600)
 def record_detail(record_type, source, identifier):
-    from urllib.parse import unquote
-    
     attacks_union = get_attacks_union()
-    
+
     if record_type == 'link':
-        
-        
         record = db.session.query(
-                    attacks_union.c.id,
-                    attacks_union.c.date,
-                    attacks_union.c.source_ip,
-                    attacks_union.c.source_port,
-                    attacks_union.c.url,
-                    attacks_union.c.protocol,
-                    attacks_union.c.honeypot_name,
-                    attacks_union.c.latitude,      
-                    attacks_union.c.longitude,
-                    attacks_union.c.source,
-                    URL.threat_names,
-                    URL.shasum,
-                    URL.malicious_flags,
-                    URL.times_submitted,
-                    URL.reputation
-                ).join(URL, attacks_union.c.url == URL.url, isouter=True
-                ).filter(attacks_union.c.id == identifier, attacks_union.c.source == source).first_or_404()
+            attacks_union.c.id,
+            attacks_union.c.date,
+            attacks_union.c.source_ip,
+            attacks_union.c.source_port,
+            attacks_union.c.url,
+            attacks_union.c.protocol,
+            attacks_union.c.honeypot_name,
+            attacks_union.c.latitude,
+            attacks_union.c.longitude,
+            attacks_union.c.source,
+            URL.threat_names,
+            URL.shasum,
+            URL.malicious_flags,
+            URL.times_submitted,
+            URL.reputation
+        ).join(URL, attacks_union.c.url == URL.url, isouter=True
+        ).filter(
+            attacks_union.c.id == identifier,
+            attacks_union.c.source == source
+        ).first_or_404()
+
         download_record = Download.query.filter_by(sha256=record.shasum).first()
         return render_template('record_detail.html', record=record, record_type=record_type, download_record=download_record)
 
     elif record_type == 'payload':
         record = db.session.query(
-                    attacks_union.c.date, 
-                    attacks_union.c.md5,
-                    attacks_union.c.source_ip,
-                    attacks_union.c.source_port, 
-                    attacks_union.c.protocol, 
-                    attacks_union.c.honeypot_name,
-                    attacks_union.c.latitude,      
-                    attacks_union.c.longitude, 
-                    attacks_union.c.source,
-                    Download.type, 
-                    Download.reputation, 
-                    Download.times_submitted, 
-                    Download.file_size,
-                    Download.popular_label, 
-                    Download.malicious_flags
-                ).join(Download, attacks_union.c.md5 == Download.md5, isouter=True
-                ).filter(attacks_union.c.md5 == identifier).first_or_404()
+            attacks_union.c.id,  # clearly included
+            attacks_union.c.date, 
+            attacks_union.c.md5,
+            attacks_union.c.source_ip,
+            attacks_union.c.source_port, 
+            attacks_union.c.protocol, 
+            attacks_union.c.honeypot_name,
+            attacks_union.c.latitude,      
+            attacks_union.c.longitude, 
+            attacks_union.c.source,        # clearly included for source matching
+            Download.type, 
+            Download.reputation, 
+            Download.times_submitted, 
+            Download.file_size,
+            Download.popular_label, 
+            Download.malicious_flags
+        ).join(Download, attacks_union.c.md5 == Download.md5, isouter=True
+        ).filter(
+            attacks_union.c.id == identifier, 
+            attacks_union.c.source == source  # clearly fixed filter condition
+        ).first_or_404()
+
         return render_template('record_detail.html', record=record, record_type=record_type)
     else:
         abort(404)
